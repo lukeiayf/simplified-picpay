@@ -1,6 +1,8 @@
 package com.lucassilva.simplified_picpay.notification;
 
 import com.lucassilva.simplified_picpay.transaction.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -10,6 +12,7 @@ import java.util.Objects;
 
 @Service
 public class NotificationConsumer {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationConsumer.class);
 
     private final RestClient restClient;
 
@@ -21,12 +24,22 @@ public class NotificationConsumer {
 
     @KafkaListener(topics = "transaction-notification", groupId = "simplified-picpay")
     public void receiveNotification(Transaction transaction) {
-        ResponseEntity<Notification> response = restClient.get()
-                .retrieve()
-                .toEntity(Notification.class);
+        LOGGER.info("Notifying transaction {}...", transaction);
+
+        ResponseEntity<Notification> response = null;
+        try {
+            response = restClient.get()
+                    .retrieve()
+                    .toEntity(Notification.class);
+        } catch (Exception e) {
+            throw new NotificationException("Error sending notification");
+        }
 
         if (response.getStatusCode().isError() || Objects.equals(Objects.requireNonNull(response.getBody()).status(), "fail")) {
             throw new NotificationException("Error sending notification");
         }
+
+        LOGGER.info("Notification has been sent {}...", response.getBody());
+
     }
 }

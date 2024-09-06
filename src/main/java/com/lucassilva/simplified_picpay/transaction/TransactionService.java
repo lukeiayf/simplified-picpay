@@ -32,9 +32,12 @@ public class TransactionService {
         //create
         Transaction newTransaction = transactionRepository.save(transaction);
         //debit from wallet
-        Wallet wallet = walletRepository.findById(transaction.payer())
+        Wallet walletPayer = walletRepository.findById(transaction.payer())
                 .orElseThrow(() -> new NoSuchElementException("Wallet not found for payer: " + transaction.payer()));
-        walletRepository.save(wallet.debit(transaction.value()));
+        Wallet walletPayee = walletRepository.findById(transaction.payee())
+                .orElseThrow(() -> new NoSuchElementException("Wallet not found for payer: " + transaction.payee()));
+        walletRepository.save(walletPayer.debit(transaction.value()));
+        walletRepository.save(walletPayee.credit(transaction.value()));
         //call external services
         //authorize
         authorizerService.authorize(transaction);
