@@ -1,7 +1,6 @@
 package com.lucassilva.simplified_picpay.transaction;
 
 import com.lucassilva.simplified_picpay.authorization.AuthorizerService;
-import com.lucassilva.simplified_picpay.exception.InvalidTransactionException;
 import com.lucassilva.simplified_picpay.wallet.Wallet;
 import com.lucassilva.simplified_picpay.wallet.WalletRepository;
 import com.lucassilva.simplified_picpay.wallet.WalletType;

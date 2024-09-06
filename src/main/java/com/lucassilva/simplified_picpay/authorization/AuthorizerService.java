@@ -1,6 +1,5 @@
 package com.lucassilva.simplified_picpay.authorization;
 
-import com.lucassilva.simplified_picpay.exception.UnauthorizedTransactionException;
 import com.lucassilva.simplified_picpay.transaction.Transaction;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
