@@ -8,6 +8,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
+import java.util.Collections;
 import java.util.Objects;
 
 @Service
@@ -28,18 +29,18 @@ public class NotificationConsumer {
 
         ResponseEntity<Notification> response = null;
         try {
-            response = restClient.get()
+            response = restClient.post()
                     .retrieve()
                     .toEntity(Notification.class);
         } catch (Exception e) {
+            throw new NotificationException(e.getMessage());
+        }
+
+        if (response.getStatusCode().isError()) {
             throw new NotificationException("Error sending notification");
         }
 
-        if (response.getStatusCode().isError() || Objects.equals(Objects.requireNonNull(response.getBody()).status(), "fail")) {
-            throw new NotificationException("Error sending notification");
-        }
-
-        LOGGER.info("Notification has been sent {}...", response.getBody());
+        LOGGER.info("Notification has been sent");
 
     }
 }
