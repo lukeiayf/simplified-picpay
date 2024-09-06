@@ -1,12 +1,14 @@
 package com.lucassilva.simplified_picpay.transaction;
 
 import com.lucassilva.simplified_picpay.authorization.AuthorizerService;
+import com.lucassilva.simplified_picpay.notification.NotificationService;
 import com.lucassilva.simplified_picpay.wallet.Wallet;
 import com.lucassilva.simplified_picpay.wallet.WalletRepository;
 import com.lucassilva.simplified_picpay.wallet.WalletType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @Service
@@ -14,11 +16,13 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final WalletRepository walletRepository;
     private final AuthorizerService authorizerService;
+    private final NotificationService notificationService;
 
-    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository, AuthorizerService authorizerService) {
+    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository, AuthorizerService authorizerService, NotificationService notificationService) {
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
         this.authorizerService = authorizerService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -34,6 +38,8 @@ public class TransactionService {
         //call external services
         //authorize
         authorizerService.authorize(transaction);
+        //notify
+        notificationService.notify(transaction);
 
         return newTransaction;
     }
@@ -55,5 +61,9 @@ public class TransactionService {
         return payer.type() == WalletType.COMMON.getValue() &&
                 payer.balance().compareTo(transaction.value()) >= 0 &&
                 !payer.id().equals(transaction.payee());
+    }
+
+    public List<Transaction> list() {
+        return transactionRepository.findAll();
     }
 }

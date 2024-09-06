@@ -1,6 +1,10 @@
 package com.lucassilva.simplified_picpay.notification;
 
 public record Notification(
-        boolean message
+        String status,
+        Data data
 ) {
+    public record Data(String message) {
+
+    }
 }
