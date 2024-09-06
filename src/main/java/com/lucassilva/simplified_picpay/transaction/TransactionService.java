@@ -1,5 +1,6 @@
 package com.lucassilva.simplified_picpay.transaction;
 
+import com.lucassilva.simplified_picpay.authorization.AuthorizerService;
 import com.lucassilva.simplified_picpay.exception.InvalidTransactionException;
 import com.lucassilva.simplified_picpay.wallet.Wallet;
 import com.lucassilva.simplified_picpay.wallet.WalletRepository;
@@ -13,10 +14,12 @@ import java.util.NoSuchElementException;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final WalletRepository walletRepository;
+    private final AuthorizerService authorizerService;
 
-    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository) {
+    public TransactionService(TransactionRepository transactionRepository, WalletRepository walletRepository, AuthorizerService authorizerService) {
         this.transactionRepository = transactionRepository;
         this.walletRepository = walletRepository;
+        this.authorizerService = authorizerService;
     }
 
     @Transactional
@@ -30,6 +33,8 @@ public class TransactionService {
                 .orElseThrow(() -> new NoSuchElementException("Wallet not found for payer: " + transaction.payer()));
         walletRepository.save(wallet.debit(transaction.value()));
         //call external services
+        //authorize
+        authorizerService.authorize(transaction);
 
         return newTransaction;
     }
